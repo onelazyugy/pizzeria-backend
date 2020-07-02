@@ -1,9 +1,12 @@
 package com.vietle.pizzeria.repo;
 
+import com.vietle.pizzeria.Constant;
 import com.vietle.pizzeria.domain.Cart;
 import com.vietle.pizzeria.domain.Wing;
+import com.vietle.pizzeria.domain.request.RemoveItemFromCartRequest;
 import com.vietle.pizzeria.exception.PizzeriaException;
 import com.vietle.pizzeria.service.MongCartSequenceService;
+import com.vietle.pizzeria.util.HelperBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -23,6 +27,8 @@ public class CartRepositoryImpl implements CartRepository {
     private MongoTemplate mongoTemplate;
     @Autowired
     private MongCartSequenceService mongCartSequenceService;
+    @Autowired
+    private HelperBean helperBean;
 
     @Override
     public int save(Cart cart) throws PizzeriaException {
@@ -102,5 +108,40 @@ public class CartRepositoryImpl implements CartRepository {
             return null;
         }
 
+    }
+
+    @Override
+    public Cart remove(RemoveItemFromCartRequest request) throws PizzeriaException {
+        int userId = Integer.parseInt(this.helperBean.decrypt(request.getEnc()));
+        Cart currentCart = this.get(userId);
+        String type = request.getType();
+        if(currentCart != null) {
+            if(type.equals(Constant.WING_TYPE)) {
+                List<Wing> wings = currentCart.getWings();
+                int wingId = request.getItemId();
+                boolean success = wings.removeIf(wing->(wing.getWingId()==wingId));
+                if(success && wings.size() > 0) {
+                    Cart updatedCart = this.updateCart(currentCart);
+                    return updatedCart;
+                } else if(success && wings.size() == 0) {
+                    Cart emptyCart = Cart.builder().userId(userId).wings(new ArrayList<>()).id(currentCart.getId()).build();
+                    this.updateCart(emptyCart);
+                    return emptyCart;
+                } else {
+                    throw new PizzeriaException("item to be removed is not in your cart", 500);
+                }
+            } else {
+                //TODO: pizza type
+                return null;
+            }
+        } else {
+            LOG.error("unable to find cart for user id: " + userId);
+            throw new PizzeriaException("cart not available", 200);
+        }
+    }
+
+    private Cart updateCart(Cart cart) {
+        Cart updatedCart = this.mongoTemplate.save(cart);
+        return updatedCart;
     }
 }

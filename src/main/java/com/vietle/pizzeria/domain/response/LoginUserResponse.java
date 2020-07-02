@@ -12,14 +12,16 @@ public class LoginUserResponse extends Response{
     private int id;
     private Token token;
     private String nickName;
+    private String enc;
 
     @Builder
-    public LoginUserResponse(boolean success, String email, int id, Token token, String nickName, Status status) {
+    public LoginUserResponse(boolean success, String email, int id, Token token, String nickName, String enc, Status status) {
         super(status);
         this.success = success;
         this.email = email;
         this.id = id;
         this.token = token;
         this.nickName = nickName;
+        this.enc = enc;
     }
 }

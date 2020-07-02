@@ -11,6 +11,7 @@ import com.vietle.pizzeria.domain.response.RegisterUserResponse;
 import com.vietle.pizzeria.exception.PizzeriaException;
 import com.vietle.pizzeria.repo.UserRepository;
 import com.vietle.pizzeria.security.JwtHelper;
+import com.vietle.pizzeria.util.HelperBean;
 import com.vietle.pizzeria.util.PizzeriaUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,8 @@ public class UserService {
     private JwtHelper jwtHelper;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private HelperBean helperBean;
 
     public LoginUserResponse login(LoginUserRequest loginUserRequest) throws PizzeriaException {
         String transactionId = UUID.randomUUID().toString();
@@ -34,7 +37,7 @@ public class UserService {
         String token = jwtHelper.createToken(retrievedUser.getEmail(), retrievedUser.getRoles());
         Token accessToken = Token.builder().accessToken(token).build();
         Status status = Status.builder().statusCd(200).message(Constant.SUCCESS).transactionId(transactionId).timestamp(PizzeriaUtil.getTimestamp()).build();
-        LoginUserResponse loginUserResponse = LoginUserResponse.builder().status(status).email(user.getEmail()).id(retrievedUser.getId()).nickName(retrievedUser.getNickName()).success(true).token(accessToken).build();
+        LoginUserResponse loginUserResponse = LoginUserResponse.builder().status(status).email(user.getEmail()).id(retrievedUser.getId()).enc(this.helperBean.encrypt(String.valueOf(retrievedUser.getId()))).nickName(retrievedUser.getNickName()).success(true).token(accessToken).build();
         return loginUserResponse;
     }
 

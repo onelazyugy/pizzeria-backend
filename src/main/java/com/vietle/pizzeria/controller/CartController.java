@@ -1,8 +1,10 @@
 package com.vietle.pizzeria.controller;
 
 import com.vietle.pizzeria.domain.request.AddWingToCartRequest;
+import com.vietle.pizzeria.domain.request.RemoveItemFromCartRequest;
 import com.vietle.pizzeria.domain.request.RetrieveCartRequest;
 import com.vietle.pizzeria.domain.response.AddWingToCartResponse;
+import com.vietle.pizzeria.domain.response.RemoveItemFromCartResponse;
 import com.vietle.pizzeria.domain.response.RetrieveCartResponse;
 import com.vietle.pizzeria.exception.PizzeriaException;
 import com.vietle.pizzeria.service.CartService;
@@ -12,7 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/cart")
@@ -40,5 +45,13 @@ public class CartController {
         return responseEntity;
     }
 
-
+    @RequestMapping("/remove")
+    public ResponseEntity<RemoveItemFromCartResponse> removeItemFromCart(@RequestBody RemoveItemFromCartRequest removeItemFromCartRequest) throws PizzeriaException {
+//                throw new PizzeriaException("unable to retrieve cart at this time", 500);
+//                throw new PizzeriaException("unable to remove item at this time", 400);
+//        throw new PizzeriaException("unable to retrieve cart at this time", 403);
+        RemoveItemFromCartResponse response = this.cartService.removeItemFromCart(removeItemFromCartRequest);
+        ResponseEntity<RemoveItemFromCartResponse> responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
+        return responseEntity;
+    }
 }
