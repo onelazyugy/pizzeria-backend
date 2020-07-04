@@ -13,4 +13,5 @@ public class RemoveItemFromCartRequest {
     private String enc;
     private String type;
     private int itemId;
+    private int numberOfOrder;
 }

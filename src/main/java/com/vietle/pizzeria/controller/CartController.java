@@ -38,7 +38,10 @@ public class CartController {
 
     @RequestMapping("/retrieve")
     public ResponseEntity<RetrieveCartResponse> retrieveCart(@RequestBody RetrieveCartRequest retrieveCartRequest, @RequestParam(required = false) boolean isGetCountOnly) throws PizzeriaException {
-//        throw new PizzeriaException("unable to retrieve cart at this time", 500);
+//                throw new PizzeriaException("unable to retrieve item from cart at this time [500]", 500);
+//                throw new PizzeriaException("unable to retrieve item at this time [400]", 400);
+//        throw new PizzeriaException("unable to retrieve cart at this time [403]", 403);
+
         Validation.validateRetrieveCart(retrieveCartRequest);
         RetrieveCartResponse response = this.cartService.retrieveCart(retrieveCartRequest, isGetCountOnly);
         ResponseEntity<RetrieveCartResponse> responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
@@ -47,9 +50,10 @@ public class CartController {
 
     @RequestMapping("/remove")
     public ResponseEntity<RemoveItemFromCartResponse> removeItemFromCart(@RequestBody RemoveItemFromCartRequest removeItemFromCartRequest) throws PizzeriaException {
-//                throw new PizzeriaException("unable to retrieve cart at this time", 500);
-//                throw new PizzeriaException("unable to remove item at this time", 400);
-//        throw new PizzeriaException("unable to retrieve cart at this time", 403);
+//                throw new PizzeriaException("unable to remove item from cart at this time [500]", 500);
+//                throw new PizzeriaException("unable to remove item at this time [400]", 400);
+//        throw new PizzeriaException("unable to remove item from cart at this time [403]", 403);
+        Validation.valiateRemoveItemFromCart(removeItemFromCartRequest);
         RemoveItemFromCartResponse response = this.cartService.removeItemFromCart(removeItemFromCartRequest);
         ResponseEntity<RemoveItemFromCartResponse> responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
         return responseEntity;

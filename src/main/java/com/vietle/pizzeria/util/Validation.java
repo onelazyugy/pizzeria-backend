@@ -1,9 +1,6 @@
 package com.vietle.pizzeria.util;
 
-import com.vietle.pizzeria.domain.request.AddWingToCartRequest;
-import com.vietle.pizzeria.domain.request.LoginUserRequest;
-import com.vietle.pizzeria.domain.request.RegisterUserRequest;
-import com.vietle.pizzeria.domain.request.RetrieveCartRequest;
+import com.vietle.pizzeria.domain.request.*;
 import com.vietle.pizzeria.exception.PizzeriaException;
 import org.springframework.util.StringUtils;
 
@@ -54,6 +51,23 @@ public class Validation {
             boolean isUserIdEmpty = StringUtils.isEmpty(request.getUserId())?true:false;
             if(isUserIdEmpty) {
                 throw new PizzeriaException("all fields are required", 400);
+            }
+        }
+    }
+
+    public static void valiateRemoveItemFromCart(RemoveItemFromCartRequest request) throws PizzeriaException {
+        if(request == null) {
+            throw new PizzeriaException("remove item from cart request is required", 400);
+        } else {
+            boolean isEncEmpty = StringUtils.isEmpty(request.getEnc());
+            boolean isInvalidItemId = request.getItemId()<0?true:false;
+            boolean isTypeEmpty = StringUtils.isEmpty(request.getType());
+            boolean isInvalidNumberOrOrder = false;
+            if(request.getNumberOfOrder() == 0 || request.getNumberOfOrder() < 0) {
+                isInvalidNumberOrOrder = true;
+            }
+            if(isEncEmpty || isInvalidItemId || isTypeEmpty || isInvalidNumberOrOrder){
+                throw new PizzeriaException("invalid request info", 400);
             }
         }
     }

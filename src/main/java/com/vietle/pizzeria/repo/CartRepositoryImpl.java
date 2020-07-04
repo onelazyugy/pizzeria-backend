@@ -1,6 +1,6 @@
 package com.vietle.pizzeria.repo;
 
-import com.vietle.pizzeria.Constant;
+import com.vietle.pizzeria.constant.Constant;
 import com.vietle.pizzeria.domain.Cart;
 import com.vietle.pizzeria.domain.Wing;
 import com.vietle.pizzeria.domain.request.RemoveItemFromCartRequest;
@@ -114,12 +114,13 @@ public class CartRepositoryImpl implements CartRepository {
     public Cart remove(RemoveItemFromCartRequest request) throws PizzeriaException {
         int userId = Integer.parseInt(this.helperBean.decrypt(request.getEnc()));
         Cart currentCart = this.get(userId);
-        String type = request.getType();
+        String type = request.getType().trim();
         if(currentCart != null) {
             if(type.equals(Constant.WING_TYPE)) {
                 List<Wing> wings = currentCart.getWings();
                 int wingId = request.getItemId();
-                boolean success = wings.removeIf(wing->(wing.getWingId()==wingId));
+                int numberOfOrder = request.getNumberOfOrder();
+                boolean success = wings.removeIf(wing->(wing.getWingId()==wingId && wing.getNumberOfOrder() == numberOfOrder));
                 if(success && wings.size() > 0) {
                     Cart updatedCart = this.updateCart(currentCart);
                     return updatedCart;

@@ -1,6 +1,6 @@
 package com.vietle.pizzeria.service;
 
-import com.vietle.pizzeria.Constant;
+import com.vietle.pizzeria.constant.Constant;
 import com.vietle.pizzeria.domain.Cart;
 import com.vietle.pizzeria.domain.CartSummary;
 import com.vietle.pizzeria.domain.Status;
@@ -13,7 +13,6 @@ import com.vietle.pizzeria.domain.response.RemoveItemFromCartResponse;
 import com.vietle.pizzeria.domain.response.RetrieveCartResponse;
 import com.vietle.pizzeria.exception.PizzeriaException;
 import com.vietle.pizzeria.repo.CartRepository;
-import com.vietle.pizzeria.util.HelperBean;
 import com.vietle.pizzeria.util.PizzeriaUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +55,7 @@ public class CartService {
         if(cart != null) {
             String message = Constant.SUCCESS;
             if(cart.getWings().size() == 0) {
-                message = "Your cart is empty";
+                message = Constant.CART_IS_EMPTY;
             }
             CartSummary cartSummary = calculateSummary(cart);
             Status status = Status.builder().statusCd(200).message(message).transactionId(transactionId).timestamp(PizzeriaUtil.getTimestamp()).build();
@@ -69,7 +68,7 @@ public class CartService {
             }
             return response;
         } else {
-            Status status = Status.builder().statusCd(200).message("Your cart is empty").transactionId(transactionId).timestamp(PizzeriaUtil.getTimestamp()).build();
+            Status status = Status.builder().statusCd(200).message(Constant.CART_IS_EMPTY).transactionId(transactionId).timestamp(PizzeriaUtil.getTimestamp()).build();
             RetrieveCartResponse response = RetrieveCartResponse.builder().status(status).success(true).cart(null).totalItemInCart(0).build();
             return response;
         }
@@ -80,10 +79,7 @@ public class CartService {
         Cart cart = this.cartRepository.remove(request);
         CartSummary cartSummary = calculateSummary(cart);
         //TODO: need to handle pizza as well
-        String message = "";
-        if(cart.getWings().size() == 0){
-            message = "Your cart is empty";
-        }
+        String message = Constant.SUCCESS;
         Status status = Status.builder().statusCd(200).message(message).transactionId(transactionId).timestamp(PizzeriaUtil.getTimestamp()).build();
         RemoveItemFromCartResponse response = RemoveItemFromCartResponse.builder().cart(cart).success(true).status(status).totalItemInCart(cart.getWings().size()).cartSummary(cartSummary).build();
         return response;
