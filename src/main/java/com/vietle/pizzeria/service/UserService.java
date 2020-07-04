@@ -1,6 +1,6 @@
 package com.vietle.pizzeria.service;
 
-import com.vietle.pizzeria.Constant;
+import com.vietle.pizzeria.constant.Constant;
 import com.vietle.pizzeria.domain.Status;
 import com.vietle.pizzeria.domain.Token;
 import com.vietle.pizzeria.domain.User;
