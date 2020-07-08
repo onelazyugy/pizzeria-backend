@@ -8,14 +8,15 @@ import com.vietle.pizzeria.domain.Wing;
 import com.vietle.pizzeria.domain.request.AddWingToCartRequest;
 import com.vietle.pizzeria.domain.request.RemoveItemFromCartRequest;
 import com.vietle.pizzeria.domain.request.RetrieveCartRequest;
+import com.vietle.pizzeria.domain.request.UpdateItemFromCartRequest;
 import com.vietle.pizzeria.domain.response.AddWingToCartResponse;
 import com.vietle.pizzeria.domain.response.RemoveItemFromCartResponse;
 import com.vietle.pizzeria.domain.response.RetrieveCartResponse;
+import com.vietle.pizzeria.domain.response.UpdateItemFromCartResponse;
 import com.vietle.pizzeria.exception.PizzeriaException;
 import com.vietle.pizzeria.repo.CartRepository;
 import com.vietle.pizzeria.util.PizzeriaUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +27,8 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class CartService {
-    private static Logger LOG = LoggerFactory.getLogger(CartService.class);
     private static BigDecimal TAX_PERCENTAGE = new BigDecimal(0.07);
     @Autowired
     private CartRepository cartRepository;
@@ -82,6 +83,16 @@ public class CartService {
         String message = Constant.SUCCESS;
         Status status = Status.builder().statusCd(200).message(message).transactionId(transactionId).timestamp(PizzeriaUtil.getTimestamp()).build();
         RemoveItemFromCartResponse response = RemoveItemFromCartResponse.builder().cart(cart).success(true).status(status).totalItemInCart(cart.getWings().size()).cartSummary(cartSummary).build();
+        return response;
+    }
+
+    public UpdateItemFromCartResponse updateItemFromCart(UpdateItemFromCartRequest request) throws PizzeriaException {
+        String transactionId = UUID.randomUUID().toString();
+        Cart cart = this.cartRepository.update(request);
+        CartSummary cartSummary = calculateSummary(cart);
+        String message = Constant.SUCCESS;
+        Status status = Status.builder().statusCd(200).message(message).transactionId(transactionId).timestamp(PizzeriaUtil.getTimestamp()).build();
+        UpdateItemFromCartResponse response = UpdateItemFromCartResponse.builder().cart(cart).success(true).status(status).totalItemInCart(cart.getWings().size()).cartSummary(cartSummary).build();
         return response;
     }
 

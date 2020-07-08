@@ -4,25 +4,25 @@ import com.vietle.pizzeria.constant.Constant;
 import com.vietle.pizzeria.domain.Cart;
 import com.vietle.pizzeria.domain.Wing;
 import com.vietle.pizzeria.domain.request.RemoveItemFromCartRequest;
+import com.vietle.pizzeria.domain.request.UpdateItemFromCartRequest;
 import com.vietle.pizzeria.exception.PizzeriaException;
 import com.vietle.pizzeria.service.MongCartSequenceService;
 import com.vietle.pizzeria.util.HelperBean;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Repository
+@Slf4j
 public class CartRepositoryImpl implements CartRepository {
-    private static Logger LOG = LoggerFactory.getLogger(CartRepository.class);
     @Autowired
     private MongoTemplate mongoTemplate;
     @Autowired
@@ -88,13 +88,53 @@ public class CartRepositoryImpl implements CartRepository {
     }
 
     @Override
-    public boolean delete(Object object) throws PizzeriaException {
-        return false;
-    }
-
-    @Override
-    public boolean update(Object object) throws PizzeriaException {
-        return false;
+    public Cart update(UpdateItemFromCartRequest request) throws PizzeriaException {
+        int userId = Integer.parseInt(this.helperBean.decrypt(request.getEnc()));
+        Cart currentCart = this.get(userId);
+        String type = request.getType().trim();
+        if(currentCart != null) {
+            if(type.equals(Constant.WING_TYPE)) {
+                List<Wing> wings = currentCart.getWings();
+                if(!wings.isEmpty()) {
+                    int wingIdToUpdate = request.getWing().getWingId();
+                    int originalSelectedQty = request.getOriginalSelectedQty();
+                    String originalSelectedFlavor = request.getOriginalSelectedFlavor();
+                    int originalNumberOfOrder = request.getOriginalNumberOfOrder();
+                    Optional<Wing> answer;
+                    //wing w/out flavor
+                    if(originalSelectedFlavor == null) {
+                        answer = wings.stream().filter(wing -> (wing.getWingId() == wingIdToUpdate
+                                && wing.getSelectedQty() == originalSelectedQty
+                                && wing.getNumberOfOrder() == originalNumberOfOrder)).findAny();
+                    } else {
+                        answer = wings.stream().filter(wing -> (wing.getWingId() == wingIdToUpdate
+                                && wing.getSelectedQty() == originalSelectedQty
+                                && wing.getSelectedFlavor().equals(originalSelectedFlavor)
+                                && wing.getNumberOfOrder() == originalNumberOfOrder)).findAny();
+                    }
+                    if(answer.isPresent()) {
+                        answer.get().setNumberOfOrder(request.getWing().getNumberOfOrder());
+                        answer.get().setSelectedQty(request.getWing().getSelectedQty());
+                        answer.get().setSelectedPrice(request.getWing().getSelectedPrice());
+                        if(request.getWing().getSelectedFlavor() != null) {
+                            answer.get().setSelectedFlavor(request.getWing().getSelectedFlavor());
+                        }
+                        Cart updatedCart = this.updateCart(currentCart);
+                        return updatedCart;
+                    } else {
+                        throw new PizzeriaException("item to be updated is not in your cart", 500);
+                    }
+                } else {
+                    throw new PizzeriaException("item to be updated is not in your cart", 500);
+                }
+            } else {
+                //TODO: pizza type
+                return null;
+            }
+        } else {
+            log.error("unable to find cart for user id: " + userId);
+            throw new PizzeriaException("cart not available", 200);
+        }
     }
 
     @Override
@@ -136,7 +176,7 @@ public class CartRepositoryImpl implements CartRepository {
                 return null;
             }
         } else {
-            LOG.error("unable to find cart for user id: " + userId);
+            log.error("unable to find cart for user id: " + userId);
             throw new PizzeriaException("cart not available", 200);
         }
     }
