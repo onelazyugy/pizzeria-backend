@@ -61,7 +61,7 @@ public class CartController {
 
     @PutMapping("/update")
     public ResponseEntity<UpdateItemFromCartResponse> updateItemInCart(@RequestBody UpdateItemFromCartRequest updateItemFromCartRequest) throws PizzeriaException {
-        log.info("/update");
+        log.info("/update api");
 //        throw new PizzeriaException("unable to remove item from cart at this time [500]", 500);
 //        throw new PizzeriaException("unable to remove item at this time [400]", 400);
 //        throw new PizzeriaException("unable to remove item from cart at this time [403]", 403);
