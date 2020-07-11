@@ -17,6 +17,5 @@ public class Cart {
     private int id;
     private int userId;
     private List<Wing> wings;
-    //TODO
-    // List of Pizza
+    private List<Pizza> pizzas;
 }

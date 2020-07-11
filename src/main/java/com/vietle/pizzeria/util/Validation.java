@@ -29,93 +29,100 @@ public class Validation {
     public static void validateAddWingOrderToCart(AddWingToCartRequest request) throws PizzeriaException {
         if(request == null) {
             throw new PizzeriaException("cart info is missing", 400);
-        } else {
-            boolean descEmpty = StringUtils.isEmpty(request.getDesc());
-            boolean imgEmpty = StringUtils.isEmpty(request.getImg());
-            boolean nameEmpty = StringUtils.isEmpty(request.getName());
-            boolean selectedFlavorEmpty = request.isHasFlavor()?StringUtils.isEmpty(request.getSelectedFlavor()):false;
-            boolean selectedPriceInvalid = request.getSelectedPrice()==null?true:false;
-            boolean userIdInvalid = request.getUserId()<0?true:false;
-            boolean wingIdInvalaid = request.getWingId()<0?true:false;
-            boolean selectedQtyInvalid = request.getSelectedQty()<6?true:false;
-            if(descEmpty || imgEmpty || nameEmpty || selectedFlavorEmpty || selectedPriceInvalid || userIdInvalid || wingIdInvalaid || selectedQtyInvalid) {
-                throw new PizzeriaException("all fields are required", 400);
-            }
+        }
+        boolean descEmpty = StringUtils.isEmpty(request.getDesc());
+        boolean imgEmpty = StringUtils.isEmpty(request.getImg());
+        boolean nameEmpty = StringUtils.isEmpty(request.getName());
+        boolean selectedFlavorEmpty = request.isHasFlavor()?StringUtils.isEmpty(request.getSelectedFlavor()):false;
+        boolean selectedPriceInvalid = request.getSelectedPrice()==null?true:false;
+        boolean userIdInvalid = request.getUserId()<0?true:false;
+        boolean wingIdInvalaid = request.getWingId()<0?true:false;
+        boolean selectedQtyInvalid = request.getSelectedQty()<6?true:false;
+        if(descEmpty || imgEmpty || nameEmpty || selectedFlavorEmpty || selectedPriceInvalid || userIdInvalid || wingIdInvalaid || selectedQtyInvalid) {
+            throw new PizzeriaException("all fields are required", 400);
+        }
+    }
+
+    public static void validateAddPizzaToCart(AddPizzaToCartRequest request) throws PizzeriaException {
+        if(request == null) {
+            throw new PizzeriaException("rquest info is missing", 400);
+        }
+        boolean isUserIdInvalid = request.getUserId()<0?true:false;
+        boolean isImgEmpty = StringUtils.isEmpty(request.getImg());
+        boolean isOrderTypeEmpty = StringUtils.isEmpty(request.getOrderType());
+        boolean isPizzaSizeInvalid = StringUtils.isEmpty(request.getSelectedPizzaSize());
+        if(isUserIdInvalid || isImgEmpty || isOrderTypeEmpty || isPizzaSizeInvalid) {
+            throw new PizzeriaException("invalid request info", 400);
         }
     }
 
     public static void validateRetrieveCart(RetrieveCartRequest request) throws PizzeriaException {
         if(request == null) {
             throw new PizzeriaException("cart request info is required", 400);
-        } else {
-            boolean isUserIdEmpty = StringUtils.isEmpty(request.getUserId())?true:false;
-            if(isUserIdEmpty) {
-                throw new PizzeriaException("all fields are required", 400);
-            }
+        }
+        boolean isUserIdEmpty = StringUtils.isEmpty(request.getUserId())?true:false;
+        if(isUserIdEmpty) {
+            throw new PizzeriaException("all fields are required", 400);
         }
     }
 
     public static void valiateRemoveItemFromCart(RemoveItemFromCartRequest request) throws PizzeriaException {
         if(request == null) {
             throw new PizzeriaException("remove item from cart request is required", 400);
-        } else {
-            boolean isEncEmpty = StringUtils.isEmpty(request.getEnc());
-            boolean isInvalidItemId = request.getItemId()<0?true:false;
-            boolean isTypeEmpty = StringUtils.isEmpty(request.getType());
-            boolean isInvalidNumberOrOrder = false;
-            if(request.getNumberOfOrder() == 0 || request.getNumberOfOrder() < 0) {
-                isInvalidNumberOrOrder = true;
-            }
-            if(isEncEmpty || isInvalidItemId || isTypeEmpty || isInvalidNumberOrOrder){
-                throw new PizzeriaException("invalid request info", 400);
-            }
+        }
+        boolean isEncEmpty = StringUtils.isEmpty(request.getEnc());
+        boolean isInvalidItemId = request.getItemId()<0?true:false;
+        boolean isTypeEmpty = StringUtils.isEmpty(request.getType());
+        boolean isInvalidNumberOrOrder = false;
+        if(request.getNumberOfOrder() == 0 || request.getNumberOfOrder() < 0) {
+            isInvalidNumberOrOrder = true;
+        }
+        if(isEncEmpty || isInvalidItemId || isTypeEmpty || isInvalidNumberOrOrder){
+            throw new PizzeriaException("invalid request info", 400);
         }
     }
 
     public static void validateUpdateItemFromCart(UpdateItemFromCartRequest request) throws PizzeriaException {
         if(request == null) {
             throw new PizzeriaException("update item from cart request is required", 400);
+        }
+        boolean isOriginalNumberOfOrderInvalid = request.getOriginalNumberOfOrder()<1?true:false;
+        boolean isOriginalSelectedQtyInvalid = request.getOriginalSelectedQty()<6?true:false;
+        boolean isOriginalSelctedFlavorEmpty = false;
+        if(request.getOriginalSelectedFlavor() == null) {
+            isOriginalNumberOfOrderInvalid = false; //this is for wing w/out flavor, we don't want to validate it
         } else {
-            boolean isOriginalNumberOfOrderInvalid = request.getOriginalNumberOfOrder()<1?true:false;
-            boolean isOriginalSelectedQtyInvalid = request.getOriginalSelectedQty()<6?true:false;
-            boolean isOriginalSelctedFlavorEmpty = false;
-            if(request.getOriginalSelectedFlavor() == null) {
-                isOriginalNumberOfOrderInvalid = false; //this is for wing w/out flavor, we don't want to validate it
-            } else {
-                isOriginalNumberOfOrderInvalid = StringUtils.isEmpty(request.getOriginalSelectedFlavor());
-            }
-
-            boolean isEncEmpty = StringUtils.isEmpty(request.getEnc());
-            boolean isTypeEmpty = StringUtils.isEmpty(request.getType());
-            if(request.getWing() == null) {
-                throw new PizzeriaException("the item to be updated is required", 400);
-            } else {
-                boolean wingIdInvalid = request.getWing().getWingId()<0?true:false;
-                boolean nameEmpty = StringUtils.isEmpty(request.getWing().getName());
-                boolean descEmpty = StringUtils.isEmpty(request.getWing().getDesc());
-                boolean imgEmpty = StringUtils.isEmpty(request.getWing().getImg());
-                boolean selectedPriceInvalid = request.getWing().getSelectedPrice()==null?true:false;
-                boolean selectedQtyInvalid = request.getWing().getSelectedQty()<6?true:false;
-                boolean selectedFlavorEmpty;
-                if(request.getWing().getSelectedFlavor() == null) {
-                    selectedFlavorEmpty = false; //this is for wing w/out flavor, we don't want to validate it
-                } else {
-                    selectedFlavorEmpty = StringUtils.isEmpty(request.getWing().getSelectedFlavor());
-                }
-                boolean isInvalidNumberOrOrder = false;
-                if(request.getWing().getNumberOfOrder() == 0 || request.getWing().getNumberOfOrder() < 0) {
-                    isInvalidNumberOrOrder = true;
-                }
-                boolean hasFlavor = request.getWing().isHasFlavor();
-                boolean isInvalidHasFlavor = true;
-                if(hasFlavor == true || hasFlavor == false) {
-                    isInvalidHasFlavor = false;
-                }
-                if(isOriginalNumberOfOrderInvalid || isOriginalSelectedQtyInvalid || isOriginalSelctedFlavorEmpty || isEncEmpty || isTypeEmpty || wingIdInvalid || nameEmpty || descEmpty || imgEmpty || selectedPriceInvalid
-                        || selectedQtyInvalid || selectedFlavorEmpty || isInvalidNumberOrOrder || isInvalidHasFlavor) {
-                    throw new PizzeriaException("invalid request info", 400);
-                }
-            }
+            isOriginalNumberOfOrderInvalid = StringUtils.isEmpty(request.getOriginalSelectedFlavor());
+        }
+        boolean isEncEmpty = StringUtils.isEmpty(request.getEnc());
+        boolean isTypeEmpty = StringUtils.isEmpty(request.getType());
+        if(request.getWing() == null) {
+            throw new PizzeriaException("the item to be updated is required", 400);
+        }
+        boolean wingIdInvalid = request.getWing().getWingId()<0?true:false;
+        boolean nameEmpty = StringUtils.isEmpty(request.getWing().getName());
+        boolean descEmpty = StringUtils.isEmpty(request.getWing().getDesc());
+        boolean imgEmpty = StringUtils.isEmpty(request.getWing().getImg());
+        boolean selectedPriceInvalid = request.getWing().getSelectedPrice()==null?true:false;
+        boolean selectedQtyInvalid = request.getWing().getSelectedQty()<6?true:false;
+        boolean selectedFlavorEmpty;
+        if(request.getWing().getSelectedFlavor() == null) {
+            selectedFlavorEmpty = false; //this is for wing w/out flavor, we don't want to validate it
+        } else {
+            selectedFlavorEmpty = StringUtils.isEmpty(request.getWing().getSelectedFlavor());
+        }
+        boolean isInvalidNumberOrOrder = false;
+        if(request.getWing().getNumberOfOrder() == 0 || request.getWing().getNumberOfOrder() < 0) {
+            isInvalidNumberOrOrder = true;
+        }
+        boolean hasFlavor = request.getWing().isHasFlavor();
+        boolean isInvalidHasFlavor = true;
+        if(hasFlavor == true || hasFlavor == false) {
+            isInvalidHasFlavor = false;
+        }
+        if(isOriginalNumberOfOrderInvalid || isOriginalSelectedQtyInvalid || isOriginalSelctedFlavorEmpty || isEncEmpty || isTypeEmpty || wingIdInvalid || nameEmpty || descEmpty || imgEmpty || selectedPriceInvalid
+                || selectedQtyInvalid || selectedFlavorEmpty || isInvalidNumberOrOrder || isInvalidHasFlavor) {
+            throw new PizzeriaException("invalid request info", 400);
         }
     }
 }

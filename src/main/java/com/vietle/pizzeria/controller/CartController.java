@@ -1,18 +1,14 @@
 package com.vietle.pizzeria.controller;
 
+import com.vietle.pizzeria.domain.request.AddPizzaToCartRequest;
 import com.vietle.pizzeria.domain.request.AddWingToCartRequest;
 import com.vietle.pizzeria.domain.request.RemoveItemFromCartRequest;
 import com.vietle.pizzeria.domain.request.RetrieveCartRequest;
 import com.vietle.pizzeria.domain.request.UpdateItemFromCartRequest;
-import com.vietle.pizzeria.domain.response.AddWingToCartResponse;
-import com.vietle.pizzeria.domain.response.RemoveItemFromCartResponse;
-import com.vietle.pizzeria.domain.response.RetrieveCartResponse;
-import com.vietle.pizzeria.domain.response.UpdateItemFromCartResponse;
+import com.vietle.pizzeria.domain.response.*;
 import com.vietle.pizzeria.exception.PizzeriaException;
 import com.vietle.pizzeria.service.CartService;
 import com.vietle.pizzeria.util.Validation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +29,18 @@ public class CartController {
         Validation.validateAddWingOrderToCart(addWingToCartRequest);
         AddWingToCartResponse response = this.cartService.addWingToCart(addWingToCartRequest);
         ResponseEntity<AddWingToCartResponse> responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
+        return responseEntity;
+    }
+
+    @PostMapping("/add/pizza")
+    public ResponseEntity<AddPizzaToCartResponse> addPizzaToCart(@RequestBody AddPizzaToCartRequest addPizzaToCartRequest) throws PizzeriaException {
+//                throw new PizzeriaException("unable to retrieve item from cart at this time [500]", 500);
+//                throw new PizzeriaException("unable to retrieve item at this time [400]", 400);
+//        throw new PizzeriaException("unable to retrieve cart at this time [403]", 403);
+
+        Validation.validateAddPizzaToCart(addPizzaToCartRequest);
+        AddPizzaToCartResponse response = this.cartService.addPizzaToCart(addPizzaToCartRequest);
+        ResponseEntity<AddPizzaToCartResponse> responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
         return responseEntity;
     }
 

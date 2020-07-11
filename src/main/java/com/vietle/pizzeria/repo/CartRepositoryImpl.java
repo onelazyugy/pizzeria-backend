@@ -2,6 +2,7 @@ package com.vietle.pizzeria.repo;
 
 import com.vietle.pizzeria.constant.Constant;
 import com.vietle.pizzeria.domain.Cart;
+import com.vietle.pizzeria.domain.Pizza;
 import com.vietle.pizzeria.domain.Wing;
 import com.vietle.pizzeria.domain.request.RemoveItemFromCartRequest;
 import com.vietle.pizzeria.domain.request.UpdateItemFromCartRequest;
@@ -16,9 +17,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Repository
 @Slf4j
@@ -32,59 +30,127 @@ public class CartRepositoryImpl implements CartRepository {
 
     @Override
     public int save(Cart cart) throws PizzeriaException {
+//        int userId = Integer.parseInt(this.helperBean.decrypt(cart.get)); //TODO:
         int nextSequence = mongCartSequenceService.getNextSequence("sequence");
         cart.setId(nextSequence);
-        if(cart.getWings().size() > 0) {
+        if(cart.getWings() != null && cart.getWings().size() > 0) {
             return saveWingOrderToCart(cart);
-        } else {
+        } else if(cart.getPizzas() != null && cart.getPizzas().size() > 0) {
             //save pizza order to cart
-            return 0;
+            return savePizzaOrderTocart(cart);
+        } else {
+            throw new PizzeriaException("unknown cart, unable to save item to cart", 400);
         }
     }
 
-    private int saveWingOrderToCart(Cart cart) {
-        int totalWingOrderInCart;
-        //save wing order to cart
+    private int savePizzaOrderTocart(Cart cart) throws PizzeriaException{
+        int totalWingOrderInCart = 0;
+        int sumOfWingAndPizzaInCart;
         Query query = new Query();
         query.addCriteria(Criteria.where("userId").is(cart.getUserId()));
-        //guaranteed to be 1 cart per userId
         List<Cart> queriedCartList = this.mongoTemplate.find(query, Cart.class);
-        if(queriedCartList != null && queriedCartList.size() > 0) {
-            Wing wingToBeSaveToCart = cart.getWings().get(0);
-            List<Wing> currentListOfWingsInCart = queriedCartList.get(0).getWings();
-            Collections.sort(currentListOfWingsInCart, Comparator.comparing(Wing::getWingId));
-            boolean matched = false;
-            for(Wing wing: currentListOfWingsInCart) {
-                // wing with flavor option
-                if(wing.getWingId() == wingToBeSaveToCart.getWingId() &&
-                        wing.isHasFlavor() && wingToBeSaveToCart.isHasFlavor() &&
-                        wing.getSelectedQty() == wingToBeSaveToCart.getSelectedQty() &&
-                        wing.getSelectedFlavor().equals(wingToBeSaveToCart.getSelectedFlavor()) &&
-                        wing.getSelectedPrice().compareTo(wingToBeSaveToCart.getSelectedPrice()) == 0) {
-                    int currentOrderCount = wing.getNumberOfOrder();
-                    wing.setNumberOfOrder(currentOrderCount+1);
-                    matched = true;
-                }
-                // wing with no flavor option
-                else if(!wingToBeSaveToCart.isHasFlavor() && !wing.isHasFlavor() && wing.getWingId() == wingToBeSaveToCart.getWingId() &&
-                        wing.getSelectedPrice().compareTo(wingToBeSaveToCart.getSelectedPrice()) == 0 && wing.getSelectedQty() == wingToBeSaveToCart.getSelectedQty()) {
-                    int currentOrderCount = wing.getNumberOfOrder();
-                    wing.setNumberOfOrder(currentOrderCount+1);
-                    matched = true;
-                }
+        if(queriedCartList != null && queriedCartList.size()>0) {
+            if(queriedCartList.get(0).getWings() != null && queriedCartList.get(0).getWings().size()>0) {
+                int currentWingOderInCart = queriedCartList.get(0).getWings().size();
+                totalWingOrderInCart = totalWingOrderInCart + currentWingOderInCart;
             }
-            if(!matched){
-                currentListOfWingsInCart.add(wingToBeSaveToCart);
+            //a pizza list already exist in this user's cart
+            if(queriedCartList.get(0).getPizzas() != null && queriedCartList.get(0).getPizzas().size()>0) {
+                //add the new pizza to the current pizza list
+                List<Pizza> currentListOfPizzas = queriedCartList.get(0).getPizzas();
+
+                //if an existing pizza equal to the new one, than increment its numberOfOrder to 1
+                boolean foundAMatchPizza = false;
+                for(Pizza pizza: currentListOfPizzas) {
+                    if(pizza.equals(cart.getPizzas().get(0))) {
+                        pizza.setNumberOfOrder(pizza.getNumberOfOrder() + 1);
+                        mongoTemplate.save(queriedCartList.get(0));//always be 1 per user
+                        foundAMatchPizza = true;
+                    }
+                }
+                if(!foundAMatchPizza) {
+                    queriedCartList.get(0).getPizzas().add(cart.getPizzas().get(0));
+                    mongoTemplate.save(queriedCartList.get(0));
+                }
+                int currentPizzaOrderInCart = currentListOfPizzas.size();
+                sumOfWingAndPizzaInCart = totalWingOrderInCart + currentPizzaOrderInCart;
             }
-            Collections.sort(currentListOfWingsInCart, Comparator.comparing(Wing::getWingId));
-            Cart cartToSave = queriedCartList.get(0);
-            mongoTemplate.save(cartToSave);
-            totalWingOrderInCart = queriedCartList.get(0).getWings().size();
+            // this user's cart does not have pizza list yet
+            else {
+                //take existing cart and add pizza if existing cart exist
+                Cart cartToSave = queriedCartList.get(0);
+                cartToSave.setPizzas(cart.getPizzas());
+                mongoTemplate.save(cartToSave);
+                sumOfWingAndPizzaInCart = 1 + totalWingOrderInCart;//only 1 pizza to save
+            }
         } else {
             mongoTemplate.save(cart);
-            totalWingOrderInCart = 1;
+            sumOfWingAndPizzaInCart = 1;
         }
-        return totalWingOrderInCart;
+        return sumOfWingAndPizzaInCart;
+    }
+
+    private int saveWingOrderToCart(Cart cart) {
+        int totalPizzaOrderInCart = 0;
+        int sumOfWingAndPizzaInCart;
+        Query query = new Query();
+        query.addCriteria(Criteria.where("userId").is(cart.getUserId()));
+        List<Cart> queriedCartList = this.mongoTemplate.find(query, Cart.class);
+        if(queriedCartList != null && queriedCartList.size() > 0) {
+            if(queriedCartList.get(0).getPizzas() != null && queriedCartList.get(0).getPizzas().size()>0) {
+                int currentPizzaOderInCart = queriedCartList.get(0).getPizzas().size();
+                totalPizzaOrderInCart = totalPizzaOrderInCart + currentPizzaOderInCart;
+            }
+
+            Wing wingToBeSavedToCart = cart.getWings().get(0);
+            //list of wing exist, add new wing to existing wing list
+            if(queriedCartList.get(0) != null && queriedCartList.get(0).getWings() != null && !queriedCartList.get(0).getWings().isEmpty()) {
+                List<Wing> currentListOfWingsInCart = queriedCartList.get(0).getWings();
+                Collections.sort(currentListOfWingsInCart, Comparator.comparing(Wing::getWingId));
+                boolean matched = false;
+                for(Wing wing: currentListOfWingsInCart) {
+                    // wing with flavor option
+                    if(wing.getWingId() == wingToBeSavedToCart.getWingId() &&
+                            wing.isHasFlavor() && wingToBeSavedToCart.isHasFlavor() &&
+                            wing.getSelectedQty() == wingToBeSavedToCart.getSelectedQty() &&
+                            wing.getSelectedFlavor().equals(wingToBeSavedToCart.getSelectedFlavor()) &&
+                            wing.getSelectedPrice().compareTo(wingToBeSavedToCart.getSelectedPrice()) == 0) {
+                        int currentOrderCount = wing.getNumberOfOrder();
+                        wing.setNumberOfOrder(currentOrderCount+1);
+                        matched = true;
+                    }
+                    // wing with no flavor option
+                    else if(!wingToBeSavedToCart.isHasFlavor() && !wing.isHasFlavor() && wing.getWingId() == wingToBeSavedToCart.getWingId() &&
+                            wing.getSelectedPrice().compareTo(wingToBeSavedToCart.getSelectedPrice()) == 0 && wing.getSelectedQty() == wingToBeSavedToCart.getSelectedQty()) {
+                        int currentOrderCount = wing.getNumberOfOrder();
+                        wing.setNumberOfOrder(currentOrderCount+1);
+                        matched = true;
+                    }
+                }
+                if(!matched){
+                    currentListOfWingsInCart.add(wingToBeSavedToCart);
+                }
+                Collections.sort(currentListOfWingsInCart, Comparator.comparing(Wing::getWingId));
+                Cart cartToSave = queriedCartList.get(0);
+                mongoTemplate.save(cartToSave);
+                int currentWingOrderInCart = queriedCartList.get(0).getWings().size();
+                sumOfWingAndPizzaInCart = totalPizzaOrderInCart + currentWingOrderInCart;
+            }
+            //list of wing is empty for this user's cart
+            else {
+                //take existing cart and add pizza if existing cart exist
+                Cart cartToSave = queriedCartList.get(0);
+                cartToSave.setWings(cart.getWings());
+                mongoTemplate.save(cartToSave);
+                sumOfWingAndPizzaInCart = 1 + totalPizzaOrderInCart;//only 1 wing to save
+            }
+        }
+        //user has no cart
+        else {
+            mongoTemplate.save(cart);
+            sumOfWingAndPizzaInCart = 1;
+        }
+        return sumOfWingAndPizzaInCart;
     }
 
     @Override
@@ -160,19 +226,16 @@ public class CartRepositoryImpl implements CartRepository {
                 List<Wing> wings = currentCart.getWings();
                 int wingId = request.getItemId();
                 int numberOfOrder = request.getNumberOfOrder();
-                boolean success = wings.removeIf(wing->(wing.getWingId()==wingId && wing.getNumberOfOrder() == numberOfOrder));
-                if(success && wings.size() > 0) {
-                    Cart updatedCart = this.updateCart(currentCart);
-                    return updatedCart;
-                } else if(success && wings.size() == 0) {
-                    Cart emptyCart = Cart.builder().userId(userId).wings(new ArrayList<>()).id(currentCart.getId()).build();
-                    this.updateCart(emptyCart);
-                    return emptyCart;
-                } else {
-                    throw new PizzeriaException("item to be removed is not in your cart", 500);
+                boolean isRemoveSuccess = wings.removeIf(wing -> {
+                    boolean isMatch = (wing.getWingId() == wingId && wing.getNumberOfOrder() == numberOfOrder);
+                    return isMatch;
+                });
+                if(isRemoveSuccess) {
+                    return this.updateCart(currentCart);
                 }
+                throw new PizzeriaException("item to be removed is not in your cart", 500);
             } else {
-                //TODO: pizza type
+                //TODO: remove pizza type
                 return null;
             }
         } else {
