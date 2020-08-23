@@ -58,8 +58,8 @@ public class CartController {
 
     @PostMapping("/remove")
     public ResponseEntity<RemoveItemFromCartResponse> removeItemFromCart(@RequestBody RemoveItemFromCartRequest removeItemFromCartRequest) throws PizzeriaException {
-//                throw new PizzeriaException("unable to remove item from cart at this time [500]", 500);
-//                throw new PizzeriaException("unable to remove item at this time [400]", 400);
+//        throw new PizzeriaException("unable to remove item from cart at this time [500]", 500);
+//        throw new PizzeriaException("unable to remove item at this time [400]", 400);
 //        throw new PizzeriaException("unable to remove item from cart at this time [403]", 403);
         Validation.valiateRemoveItemFromCart(removeItemFromCartRequest);
         RemoveItemFromCartResponse response = this.cartService.removeItemFromCart(removeItemFromCartRequest);
