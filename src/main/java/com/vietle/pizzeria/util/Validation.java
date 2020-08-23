@@ -71,13 +71,9 @@ public class Validation {
             throw new PizzeriaException("remove item from cart request is required", 400);
         }
         boolean isEncEmpty = StringUtils.isEmpty(request.getEnc());
-        boolean isInvalidItemId = request.getItemId()<0?true:false;
         boolean isTypeEmpty = StringUtils.isEmpty(request.getType());
-        boolean isInvalidNumberOrOrder = false;
-        if(request.getNumberOfOrder() == 0 || request.getNumberOfOrder() < 0) {
-            isInvalidNumberOrOrder = true;
-        }
-        if(isEncEmpty || isInvalidItemId || isTypeEmpty || isInvalidNumberOrOrder){
+        boolean isWingNull = request.getWing() == null;
+        if(isEncEmpty || isWingNull || isTypeEmpty){
             throw new PizzeriaException("invalid request info", 400);
         }
     }

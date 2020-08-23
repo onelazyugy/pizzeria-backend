@@ -224,10 +224,8 @@ public class CartRepositoryImpl implements CartRepository {
         if(currentCart != null) {
             if(type.equals(Constant.WING_TYPE)) {
                 List<Wing> wings = currentCart.getWings();
-                int wingId = request.getItemId();
-                int numberOfOrder = request.getNumberOfOrder();
                 boolean isRemoveSuccess = wings.removeIf(wing -> {
-                    boolean isMatch = (wing.getWingId() == wingId && wing.getNumberOfOrder() == numberOfOrder);
+                    boolean isMatch = wing.equals(request.getWing());
                     return isMatch;
                 });
                 if(isRemoveSuccess) {
