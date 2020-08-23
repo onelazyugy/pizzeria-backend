@@ -46,8 +46,8 @@ public class CartController {
 
     @PostMapping("/retrieve")
     public ResponseEntity<RetrieveCartResponse> retrieveCart(@RequestBody RetrieveCartRequest retrieveCartRequest, @RequestParam(required = false) boolean isGetCountOnly) throws PizzeriaException {
-//                throw new PizzeriaException("unable to retrieve item from cart at this time [500]", 500);
-//                throw new PizzeriaException("unable to retrieve item at this time [400]", 400);
+//        throw new PizzeriaException("unable to retrieve item from cart at this time [500]", 500);
+//        throw new PizzeriaException("unable to retrieve item at this time [400]", 400);
 //        throw new PizzeriaException("unable to retrieve cart at this time [403]", 403);
 
         Validation.validateRetrieveCart(retrieveCartRequest);
