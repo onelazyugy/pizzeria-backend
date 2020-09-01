@@ -14,9 +14,9 @@
 	<name>pizzeria</name>
 	<description>backend java springboot to support pizzeria</description>
 
-	<properties>
-		<java.version>11</java.version>
-	</properties>
+	<!--<properties>-->
+		<!--<java.version>8</java.version>-->
+	<!--</properties>-->
 
 	<dependencies>
 		<dependency>
@@ -28,10 +28,18 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<!--mongo-->
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+			<version>3.12.7</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
+		<!--end mongo-->
+
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
