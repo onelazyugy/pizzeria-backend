@@ -3,20 +3,27 @@ package com.vietle.pizzeria.security;
 import com.vietle.pizzeria.domain.User;
 import com.vietle.pizzeria.exception.PizzeriaException;
 import com.vietle.pizzeria.repo.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class MyUserDetails implements UserDetailsService {
-    private static Logger LOG = LoggerFactory.getLogger(MyUserDetails.class);
-
+    //postgres
     @Autowired
+    @Qualifier("userRepositoryImplPostGres")
     private UserRepository userRepository;
+
+    // {"_id":{"$numberInt":"4"},"email":"viet@gmail.com","password":"209400a93168b367e9604f427bb1c5a56f546889262014e84f153a1d273cf631","nickName":"VIET","roles":["ROLE_USER"],"_class":"com.vietle.pizzeria.domain.User"}
+    //mongo
+//    @Autowired
+//    @Qualifier("userRepositoryImplMongo")
+//    private UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -28,7 +35,7 @@ public class MyUserDetails implements UserDetailsService {
             }
 
         } catch (PizzeriaException ee) {
-            LOG.error("error finding user");//TODO:
+            log.error("error finding user");//TODO:
         }
         return org.springframework.security.core.userdetails.User//
                 .withUsername(email)

@@ -13,20 +13,25 @@ import com.vietle.pizzeria.repo.UserRepository;
 import com.vietle.pizzeria.security.JwtHelper;
 import com.vietle.pizzeria.util.HelperBean;
 import com.vietle.pizzeria.util.PizzeriaUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class UserService {
-    private static Logger LOG = LoggerFactory.getLogger(UserService.class);
     @Autowired
     private JwtHelper jwtHelper;
+
     @Autowired
+    @Qualifier("userRepositoryImplPostGres")
     private UserRepository userRepository;
+
     @Autowired
     private HelperBean helperBean;
 
@@ -52,13 +57,4 @@ public class UserService {
         }
         throw new PizzeriaException("unable to register user " + user.getEmail(), 500);
     }
-
-//    public UserResponse findUserById(int id) throws EcommerceException{
-//        String transactionId = UUID.randomUUID().toString();
-//        User retrievedUser = this.userRepository.retrieve(id);
-//        Status status = Status.builder().statusCd(200).message(Constant.SUCCESS).transactionId(transactionId).timestamp(EcommerceUtil.getTimestamp()).build();
-//        //TODO: retrievedUser
-//        UserResponse response = UserResponse.builder().user(retrievedUser).status(status).token(null).build();
-//        return response;
-//    }
 }

@@ -10,6 +10,7 @@ import com.vietle.pizzeria.repo.CartRepository;
 import com.vietle.pizzeria.util.PizzeriaUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ import java.util.UUID;
 public class CartService {
     private static BigDecimal TAX_PERCENTAGE = new BigDecimal(0.07);
     @Autowired
+    @Qualifier("cartRepositoryImplMongo")
     private CartRepository cartRepository;
     @Autowired
     private PriceService priceService;

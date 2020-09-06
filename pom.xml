@@ -40,6 +40,18 @@
 		</dependency>
 		<!--end mongo-->
 
+		<!--postgres-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+			<version>2.3.3.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.2.16</version>
+		</dependency>
+		<!--end postgres-->
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -117,6 +129,7 @@
 			<version>5.6.2</version>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 
 	<build>

@@ -11,6 +11,7 @@ import com.vietle.pizzeria.service.MongCartSequenceService;
 import com.vietle.pizzeria.util.HelperBean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -19,8 +20,9 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 
 @Repository
+@Qualifier("cartRepositoryImplMongo")
 @Slf4j
-public class CartRepositoryImpl implements CartRepository {
+public class CartRepositoryImplMongo implements CartRepository {
     @Autowired
     private MongoTemplate mongoTemplate;
     @Autowired

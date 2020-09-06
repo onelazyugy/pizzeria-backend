@@ -3,6 +3,7 @@ package com.vietle.pizzeria.security;
 import com.vietle.pizzeria.exception.PizzeriaException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,8 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 
 @Component
+@Slf4j
 public class JwtTokenProvider {
-    private static Logger LOG = LoggerFactory.getLogger(JwtTokenProvider.class);
-
     @Value("${security.jwt.token.secret-key}")
     private String secretKey;
 
@@ -46,6 +46,7 @@ public class JwtTokenProvider {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
+            log.error(String.format("JwtTokenProvider error: %s", e.getMessage()));
             throw new PizzeriaException("Expired or invalid JWT token", 500);
         }
     }
