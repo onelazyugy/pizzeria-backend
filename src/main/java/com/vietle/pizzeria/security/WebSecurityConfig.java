@@ -35,6 +35,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/v1/user/register").permitAll()
                 .antMatchers("/api/v1/user/login").permitAll()
 
+                //TODO: remove me after testing JPA
+                .antMatchers("/api/v1/jpa/**").permitAll()
+                //end
+
                 // Everything else will require jwt token
                 .anyRequest().authenticated();
 
