@@ -17,6 +17,7 @@ security.jwt.token.expire-length: 900000
 springdoc.api-docs.path: /api-docs
 #management.endpoints.web.exposure.include=*
 
+#custom table and column naming strategy
 spring:
   jpa:
     hibernate:
